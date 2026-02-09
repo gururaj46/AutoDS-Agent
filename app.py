@@ -186,3 +186,11 @@ if uploaded_file is not None:
 
         st.markdown("---")
         st.info("💡 Recommendation: Consider hyperparameter tuning and advanced feature engineering to further improve performance.")
+# ----------------------------
+# FOOTER
+# ----------------------------
+st.markdown("---")
+st.markdown(
+    "<center>© 2026 AutoDS | Developed By : Gururaj Tandur </center>",
+    unsafe_allow_html=True
+)
