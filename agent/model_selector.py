@@ -11,8 +11,6 @@ def train_and_evaluate(X, y, problem_type):
         X, y, test_size=0.2, random_state=42
     )
 
-    models = {}
-
     if problem_type == "Regression":
         models = {
             "Linear Regression": LinearRegression(),
@@ -26,10 +24,10 @@ def train_and_evaluate(X, y, problem_type):
             "Decision Tree Classifier": DecisionTreeClassifier(random_state=42),
         }
 
-    model_results = {}
+    model_scores = {}
     trained_models = {}
 
-    # Train and evaluate
+    # Train & evaluate
     for name, model in models.items():
         model.fit(X_train, y_train)
         predictions = model.predict(X_test)
@@ -39,20 +37,27 @@ def train_and_evaluate(X, y, problem_type):
         else:
             score = accuracy_score(y_test, predictions)
 
-        model_results[name] = score
+        model_scores[name] = score
         trained_models[name] = model
 
-    # Select best model
-    best_model_name = max(model_results, key=model_results.get)
-    best_score = model_results[best_model_name]
+    # Select best
+    best_model_name = max(model_scores, key=model_scores.get)
+    best_score = model_scores[best_model_name]
     best_model = trained_models[best_model_name]
 
-    # Feature importance (if available)
+    # Feature importance
     feature_importance = {}
-
     if hasattr(best_model, "feature_importances_"):
         feature_importance = dict(
             zip(X.columns, best_model.feature_importances_)
         )
 
-    return best_model_name, best_score, model_results, feature_importance
+    # ✅ Proper metrics dictionary (Cloud Safe)
+    metrics = {
+        "Best Model": best_model_name,
+        "Best Score": round(float(best_score), 4),
+        "All Model Scores": model_scores
+    }
+
+    # ✅ RETURN EXACTLY 3 VALUES
+    return best_model, metrics, feature_importance
