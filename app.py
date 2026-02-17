@@ -35,6 +35,9 @@ if "model_results" not in st.session_state:
 if "ai_report" not in st.session_state:
     st.session_state.ai_report = None
 
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
 
 # ==========================
 # SIDEBAR
@@ -176,18 +179,14 @@ if st.session_state.model_results:
     results = st.session_state.model_results
     df = results["df"]
 
-    # -------------------------
     # Leaderboard
-    # -------------------------
     st.markdown("---")
     st.subheader("🏆 Model Leaderboard")
     st.dataframe(results["leaderboard"], width="stretch")
     st.success(f"🥇 Best Model: {results['best_model_name']}")
     st.metric("Best Score", round(results["best_score"], 4))
 
-    # -------------------------
-    # Model Performance Graph
-    # -------------------------
+    # Performance Graph
     st.markdown("---")
     st.subheader("📈 Model Performance Comparison")
 
@@ -195,42 +194,30 @@ if st.session_state.model_results:
         results["leaderboard"],
         x="Model",
         y="Score",
-        text="Score",
-        title="Model Performance"
+        text="Score"
     )
-    st.plotly_chart(fig_perf, use_container_width=True)
+    st.plotly_chart(fig_perf, width="stretch")
 
-    # -------------------------
     # Target Distribution
-    # -------------------------
     st.markdown("---")
     st.subheader("📊 Target Distribution")
 
-    fig_target = px.histogram(
-        df,
-        x=results["target"],
-        title="Target Distribution"
-    )
-    st.plotly_chart(fig_target, use_container_width=True)
+    fig_target = px.histogram(df, x=results["target"])
+    st.plotly_chart(fig_target, width="stretch")
 
-    # -------------------------
     # Correlation Heatmap
-    # -------------------------
     st.markdown("---")
     st.subheader("🔥 Correlation Heatmap")
 
     numeric_df = df.select_dtypes(include=["number"])
-
     if len(numeric_df.columns) > 1:
         corr = numeric_df.corr()
-        fig_heatmap = px.imshow(corr, text_auto=True, aspect="auto")
-        st.plotly_chart(fig_heatmap, use_container_width=True)
+        fig_heatmap = px.imshow(corr, text_auto=True)
+        st.plotly_chart(fig_heatmap, width="stretch")
     else:
         st.info("Not enough numeric columns for correlation heatmap.")
 
-    # -------------------------
-    # Executive Summary Dashboard
-    # -------------------------
+    # Executive Summary
     st.markdown("---")
     st.subheader("📄 Executive Summary")
 
@@ -242,9 +229,7 @@ if st.session_state.model_results:
     st.success(f"🏆 Best Model: {results['best_model_name']}")
     st.info(f"🧠 Problem Type: {results['problem_type']}")
 
-    # -------------------------
-    # AI Report Section
-    # -------------------------
+    # AI REPORT
     st.markdown("---")
     st.subheader("🤖 AI Business Insight Generator")
 
@@ -271,6 +256,43 @@ if st.session_state.model_results:
             file_name="AutoDS_Executive_Report.pdf",
             mime="application/pdf"
         )
+
+    # ==========================
+    # 🤖 AI ML COPILOT CHAT
+    # ==========================
+    st.markdown("---")
+    st.subheader("🧠 AutoDS AI Copilot")
+
+    user_input = st.text_input("Ask your AI ML Copilot:")
+
+    if user_input:
+
+        response = ""
+
+        if "why" in user_input.lower() and "model" in user_input.lower():
+            response = f"{results['best_model_name']} was selected because it achieved the highest score of {results['best_score']}."
+
+        elif "roc" in user_input.lower():
+            response = "ROC Curve measures classification performance across thresholds. Higher AUC means better separation."
+
+        elif "feature" in user_input.lower():
+            if results["feature_importance"]:
+                top_feature = list(results["feature_importance"].keys())[0]
+                response = f"The most important feature impacting predictions is: {top_feature}"
+            else:
+                response = "Feature importance not available for this model."
+
+        elif "improve" in user_input.lower():
+            response = "To improve performance: add better features, tune hyperparameters, handle imbalance, or increase training data."
+
+        else:
+            response = "You can ask about model selection, ROC curve, features, or improvement suggestions."
+
+        st.session_state.chat_history.append(("You", user_input))
+        st.session_state.chat_history.append(("Copilot", response))
+
+    for sender, message in st.session_state.chat_history:
+        st.write(f"**{sender}:** {message}")
 
 
 # ==========================
