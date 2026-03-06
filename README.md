@@ -5,3 +5,5 @@
 - Removed pycache
 - Improved project structure
 Update on March 4 - small improvement
+
+Update: March 6 progress
