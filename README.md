@@ -7,3 +7,5 @@
 Update on March 4 - small improvement
 
 Update: March 6 progress
+
+Update: March 8 progress
